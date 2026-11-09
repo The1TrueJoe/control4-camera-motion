@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<devicedata>
+	<copyright>Copyright 2026 Joseph Telaak. All rights reserved.</copyright>
+	<creator>Joseph Telaak</creator>
+	<name>NVR Camera Motion Sensors</name>
+	<manufacturer>Joseph Telaak</manufacturer>
+	<model>NVR Camera Motion</model>
+	<created>2026-11-09</created>
+	<modified>2026-11-09</modified>
+	<version>1</version>
+	<minimum_auto_update_version>1</minimum_auto_update_version>
+	<auto_update>false</auto_update>
+
+	<control>lua_gen</control>
+	<controlmethod>ip</controlmethod>
+	<driver>DriverWorks</driver>
+
+	<documentation file="www/documentation.html"/>
+
+	<!--
+		One contactsingle (motion) proxy per camera channel. Each becomes its own device in the
+		Control4 project with the stock "senses motion" / "stops sensing motion" events and a
+		ContactState variable. A Homebridge plugin reads these sensors by name. The driver feeds
+		them from the NVR's ONVIF motion events, so no vendor-specific code lives in the plugin.
+		Channels beyond "Camera Channel Count" are left inert (never reported); hide or ignore them
+		in Composer. To support more than 8 channels, add matching <proxy>/<connection> pairs.
+	-->
+	<proxies qty="8">
+		<proxy proxybindingid="5001" primary="True" name="Camera 1">contactsingle</proxy>
+		<proxy proxybindingid="5002" name="Camera 2">contactsingle</proxy>
+		<proxy proxybindingid="5003" name="Camera 3">contactsingle</proxy>
+		<proxy proxybindingid="5004" name="Camera 4">contactsingle</proxy>
+		<proxy proxybindingid="5005" name="Camera 5">contactsingle</proxy>
+		<proxy proxybindingid="5006" name="Camera 6">contactsingle</proxy>
+		<proxy proxybindingid="5007" name="Camera 7">contactsingle</proxy>
+		<proxy proxybindingid="5008" name="Camera 8">contactsingle</proxy>
+	</proxies>
+
+	<connections>
+		<!-- One CONTACT_SENSOR provider connection per channel, matching each proxy binding. -->
+		<connection>
+			<id>5001</id>
+			<facing>6</facing>
+			<connectionname>Camera 1</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+		<connection>
+			<id>5002</id>
+			<facing>6</facing>
+			<connectionname>Camera 2</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+		<connection>
+			<id>5003</id>
+			<facing>6</facing>
+			<connectionname>Camera 3</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+		<connection>
+			<id>5004</id>
+			<facing>6</facing>
+			<connectionname>Camera 4</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+		<connection>
+			<id>5005</id>
+			<facing>6</facing>
+			<connectionname>Camera 5</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+		<connection>
+			<id>5006</id>
+			<facing>6</facing>
+			<connectionname>Camera 6</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+		<connection>
+			<id>5007</id>
+			<facing>6</facing>
+			<connectionname>Camera 7</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+		<connection>
+			<id>5008</id>
+			<facing>6</facing>
+			<connectionname>Camera 8</connectionname>
+			<type>2</type>
+			<consumer>False</consumer>
+			<classes><class><classname>CONTACT_SENSOR</classname></class></classes>
+		</connection>
+
+		<!-- Network connection to the NVR (HTTP / ONVIF). -->
+		<connection>
+			<id>6001</id>
+			<facing>6</facing>
+			<connectionname>NVR</connectionname>
+			<type>4</type>
+			<consumer>True</consumer>
+			<hidden>True</hidden>
+			<classes>
+				<class>
+					<classname>TCP</classname>
+					<ports>
+						<port>
+							<number>80</number>
+							<auto_connect>False</auto_connect>
+							<monitor_connection>False</monitor_connection>
+							<keep_connection>False</keep_connection>
+						</port>
+					</ports>
+				</class>
+			</classes>
+		</connection>
+	</connections>
+
+	<config>
+		<script file="driver.lua" jit="1"/>
+
+		<properties>
+			<property>
+				<name>--- Connection ---</name>
+				<type>LABEL</type>
+				<default>--- Connection ---</default>
+			</property>
+			<property>
+				<name>DVR Address</name>
+				<type>STRING</type>
+				<default></default>
+				<tooltip>IP address or hostname of the NVR/DVR.</tooltip>
+			</property>
+			<property>
+				<name>HTTP Port</name>
+				<type>RANGED_INTEGER</type>
+				<minimum>1</minimum>
+				<maximum>65535</maximum>
+				<default>80</default>
+				<tooltip>HTTP port of the NVR (ONVIF rides on this port). Default 80.</tooltip>
+			</property>
+			<property>
+				<name>Username</name>
+				<type>STRING</type>
+				<default>admin</default>
+				<tooltip>NVR account used for ONVIF. Give it an ONVIF/operator role on the NVR.</tooltip>
+			</property>
+			<property>
+				<name>Password</name>
+				<type>STRING</type>
+				<password>true</password>
+				<default></default>
+				<tooltip>Password for the NVR account.</tooltip>
+			</property>
+
+			<property>
+				<name>--- Behavior ---</name>
+				<type>LABEL</type>
+				<default>--- Behavior ---</default>
+			</property>
+			<property>
+				<name>Camera Channel Count</name>
+				<type>RANGED_INTEGER</type>
+				<minimum>1</minimum>
+				<maximum>8</maximum>
+				<default>8</default>
+				<tooltip>Number of camera channels to expose (1-8). Channels above this are left inert.</tooltip>
+			</property>
+			<property>
+				<name>Motion Hold (seconds)</name>
+				<type>RANGED_INTEGER</type>
+				<minimum>0</minimum>
+				<maximum>120</maximum>
+				<default>5</default>
+				<tooltip>Keep a sensor "open" this long after the NVR reports motion ended (debounce / HKSV hold).</tooltip>
+			</property>
+			<property>
+				<name>Pull Timeout (seconds)</name>
+				<type>RANGED_INTEGER</type>
+				<minimum>1</minimum>
+				<maximum>30</maximum>
+				<default>4</default>
+				<tooltip>ONVIF long-poll window per request. The driver re-polls continuously; lower = faster reconnect, more requests.</tooltip>
+			</property>
+
+			<property>
+				<name>--- Camera Names ---</name>
+				<type>LABEL</type>
+				<default>--- Camera Names ---</default>
+			</property>
+			<property>
+				<name>Camera 1 Name</name>
+				<type>STRING</type>
+				<default>Camera 1</default>
+				<tooltip>Name for channel 1. Also rename this sub-device in Composer to match (the plugin matches by device name).</tooltip>
+			</property>
+			<property>
+				<name>Camera 2 Name</name>
+				<type>STRING</type>
+				<default>Camera 2</default>
+			</property>
+			<property>
+				<name>Camera 3 Name</name>
+				<type>STRING</type>
+				<default>Camera 3</default>
+			</property>
+			<property>
+				<name>Camera 4 Name</name>
+				<type>STRING</type>
+				<default>Camera 4</default>
+			</property>
+			<property>
+				<name>Camera 5 Name</name>
+				<type>STRING</type>
+				<default>Camera 5</default>
+			</property>
+			<property>
+				<name>Camera 6 Name</name>
+				<type>STRING</type>
+				<default>Camera 6</default>
+			</property>
+			<property>
+				<name>Camera 7 Name</name>
+				<type>STRING</type>
+				<default>Camera 7</default>
+			</property>
+			<property>
+				<name>Camera 8 Name</name>
+				<type>STRING</type>
+				<default>Camera 8</default>
+			</property>
+
+			<property>
+				<name>--- Status ---</name>
+				<type>LABEL</type>
+				<default>--- Status ---</default>
+			</property>
+			<property>
+				<name>Connection Status</name>
+				<type>STRING</type>
+				<readonly>true</readonly>
+				<default>Not Connected</default>
+			</property>
+			<property>
+				<name>Last Event</name>
+				<type>STRING</type>
+				<readonly>true</readonly>
+				<default></default>
+			</property>
+			<property>
+				<name>Driver Version</name>
+				<type>STRING</type>
+				<readonly>true</readonly>
+				<default>dev</default>
+			</property>
+			<property>
+				<name>Debug Mode</name>
+				<type>LIST</type>
+				<default>Off</default>
+				<items>
+					<item>Off</item>
+					<item>On</item>
+				</items>
+				<tooltip>Log ONVIF activity and motion events to the Lua output window.</tooltip>
+			</property>
+		</properties>
+
+		<actions>
+			<action>
+				<name>Test Connection</name>
+				<command>TEST_CONNECTION</command>
+			</action>
+			<action>
+				<name>Restart Motion Monitor</name>
+				<command>RESTART</command>
+			</action>
+		</actions>
+	</config>
+</devicedata>

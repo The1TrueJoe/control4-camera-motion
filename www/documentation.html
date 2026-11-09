@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>NVR Camera Motion Sensors</title>
+	<style>
+		body { font-family: -apple-system, Helvetica, Arial, sans-serif; margin: 1.5em; color: #222; line-height: 1.45; }
+		h1 { font-size: 1.3em; } h2 { font-size: 1.05em; margin-top: 1.4em; }
+		code { background: #f2f2f2; padding: 0 3px; border-radius: 3px; }
+		table { border-collapse: collapse; margin: 0.5em 0; }
+		td, th { border: 1px solid #ccc; padding: 3px 8px; text-align: left; font-size: 0.9em; }
+	</style>
+</head>
+<body>
+	<h1>NVR Camera Motion Sensors</h1>
+	<p>Exposes each camera channel of an ONVIF NVR/DVR as a standard Control4 contact (motion)
+	sensor, driven by the NVR's own motion detection. A Homebridge plugin can then read these
+	sensors by name and forward them to HomeKit Secure Video &mdash; no vendor code in the plugin.</p>
+
+	<h2>Setup</h2>
+	<ol>
+		<li>Set <b>DVR Address</b>, <b>HTTP Port</b> (default 80), <b>Username</b> and
+			<b>Password</b> to an NVR account with an ONVIF/operator role.</li>
+		<li>Set <b>Camera Channel Count</b> to the number of channels (1&ndash;8).</li>
+		<li>Give each <b>Camera N Name</b> the camera's name, and rename the matching sensor
+			sub-device in the project tree to the same name (the plugin matches by device name).</li>
+		<li>Run the <b>Test Connection</b> action; <b>Connection Status</b> should read
+			<i>OK: ONVIF events available</i>.</li>
+	</ol>
+
+	<h2>How it works</h2>
+	<p>The driver opens an ONVIF PullPoint subscription on the NVR and long-polls
+	<code>PullMessages</code>. Each <code>tns1:VideoSource/MotionAlarm</code> notification carries a
+	channel token and a true/false state; the driver sets that channel's contact sensor open on
+	motion and closed again after the <b>Motion Hold</b> window.</p>
+
+	<h2>Channels</h2>
+	<p>This driver ships with eight contact proxies. Channels above <b>Camera Channel Count</b> are
+	left inert &mdash; hide or ignore them in Composer. To support more than eight channels, add
+	matching <code>&lt;proxy&gt;</code> / <code>&lt;connection&gt;</code> pairs in
+	<code>driver.xml</code> and rebuild.</p>
+</body>
+</html>
